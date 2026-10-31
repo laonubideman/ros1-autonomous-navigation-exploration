@@ -1,0 +1,7 @@
+{
+  "turtlebot3": "4ae959ea6a52415c90bf752d2b76e3e28f8a87e2",
+  "FAST_LIO": "7cc4175de6f8ba2edf34bab02a42195b141027e9",
+  "livox_ros_driver": "3d240d5666129e1a3052e78ee8487a04b08fdda3",
+  "Livox-SDK": "9306596a2bf15c1343bc023b497465ed0a32909d",
+  "FAST_LIO_submodules": "e2e3f4e9d3b95a9e66b1ba83dc98d4a05ed8a3c4 include/ikd-Tree (remotes/origin/fast_lio)"
+}

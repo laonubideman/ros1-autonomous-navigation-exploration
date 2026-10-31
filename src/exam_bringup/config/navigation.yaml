@@ -1,0 +1,92 @@
+# move_base 的全局 A 星、局部 DWA、代价地图与目标到达容差参数。
+base_global_planner: global_planner/GlobalPlanner
+base_local_planner: dwa_local_planner/DWAPlannerROS
+controller_frequency: 10.0
+planner_frequency: 1.0
+planner_patience: 6.0
+controller_patience: 8.0
+# Position-only watchdog must allow a differential robot to turn in place.
+oscillation_timeout: 45.0
+oscillation_distance: 0.10
+recovery_behavior_enabled: false
+clearing_rotation_allowed: false
+shutdown_costmaps: false
+make_plan_clear_costmap: false
+make_plan_add_unreachable_goal: false
+
+# 全局规划使用 A 星；当前 FAST-LIO2 launch 会覆盖未知区域策略。
+GlobalPlanner:
+  use_dijkstra: false
+  # Trace A-star's potential through grid cells; gradient tracing can fail on valid paths.
+  use_grid_path: true
+  allow_unknown: false
+  default_tolerance: 0.0
+
+# 固定地图坐标下的全局代价地图，用于计算长距离路线。
+global_costmap:
+  global_frame: map
+  rolling_window: false
+  track_unknown_space: true
+  update_frequency: 5.0
+  publish_frequency: 2.0
+  plugins:
+    - {name: static_layer, type: 'costmap_2d::StaticLayer'}
+    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+
+# 随车移动的局部代价地图，用于 DWA 轨迹碰撞检查。
+local_costmap:
+  global_frame: odom
+  rolling_window: true
+  track_unknown_space: true
+  width: 5.0
+  height: 5.0
+  update_frequency: 5.0
+  publish_frequency: 5.0
+  plugins:
+    - {name: static_layer, type: 'costmap_2d::StaticLayer'}
+    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+
+# 差速车动态窗口采样；纵向前进与转向可用，横向速度必须为零。
+DWAPlannerROS:
+  odom_topic: /odom
+  # 车体前向速度上限，单位米每秒。
+  max_vel_x: 0.20
+  min_vel_x: 0.0
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+  max_vel_trans: 0.20
+  min_vel_trans: 0.02
+  # 偏航角速度上限，单位弧度每秒。
+  max_vel_theta: 1.0
+  min_vel_theta: 0.10
+  acc_lim_x: 0.4
+  acc_lim_y: 0.0
+  acc_lim_theta: 1.0
+  # 位置到达容差，单位米；朝向仍由下一项 yaw_goal_tolerance 判断。
+  xy_goal_tolerance: 0.15
+  yaw_goal_tolerance: 0.20
+  latch_xy_goal_tolerance: true
+  trans_stopped_vel: 0.02
+  theta_stopped_vel: 0.05
+  # DWA 每个采样速度向前模拟的时间长度，单位秒。
+  sim_time: 2.0
+  sim_granularity: 0.025
+  angular_sim_granularity: 0.05
+  # 线速度采样数量，与角速度采样数量共同影响计算负担。
+  vx_samples: 12
+  vy_samples: 1
+  vth_samples: 30
+  # 轨迹评分中的路径跟随、目标接近与障碍距离权重。
+  path_distance_bias: 32.0
+  goal_distance_bias: 20.0
+  occdist_scale: 0.05
+  forward_point_distance: 0.15
+  scaling_speed: 0.15
+  max_scaling_factor: 0.10
+  oscillation_reset_dist: 0.05
+  oscillation_reset_angle: 0.20
+  use_dwa: true
+  publish_traj_pc: true
+  publish_cost_grid_pc: false

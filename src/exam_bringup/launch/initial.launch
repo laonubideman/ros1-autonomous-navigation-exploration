@@ -1,0 +1,40 @@
+<!-- 启动固定物理场景、官方小车、速度保护与 RViz；本模式本身不进行 SLAM。 -->
+<launch>
+  <arg name="rviz" default="true"/>
+  <arg name="navigation" default="false"/>
+  <arg name="rviz_config" default="$(find exam_bringup)/config/initial.rviz"/>
+  <param name="use_sim_time" value="true"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find exam_bringup)/worlds/fixed_exam.world"/>
+    <arg name="gui" value="false"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+  </include>
+  <param name="robot_description" command="$(find exam_bringup)/scripts/model_for_sim.py"/>
+  <param name="simulation_description" command="$(find exam_bringup)/scripts/model_for_sim.py --sdf"/>
+  <!-- 启动节点 spawn_exam_robot；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_exam_robot"
+        args="-sdf -param simulation_description -model exam_robot -x 2 -y 2 -z 0.02" output="screen"/>
+  <!-- 启动节点 robot_state_publisher；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  <!-- Fixed reference transform for the simulation demo, replaced by localization later. -->
+  <!-- 启动节点 reference_map_to_odom；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="reference_map_to_odom" args="0 0 0 0 0 0 map odom"/>
+  <!-- 启动节点 reference_map；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="map_server" type="map_server" name="reference_map" args="$(find exam_bringup)/maps/organizer_truth.yaml"/>
+  <!-- 启动节点 scene_visuals；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_bringup" type="scene_visuals.py" name="scene_visuals" output="screen">
+    <param name="geometry_file" value="$(find exam_bringup)/config/arena.json"/>
+  </node>
+  <!-- 启动节点 velocity_guard；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_bringup" type="velocity_guard.py" name="velocity_guard" output="screen">
+    <param name="require_scan" value="$(arg navigation)"/>
+    <rosparam if="$(arg navigation)" command="load" file="$(find exam_bringup)/config/costmap_common.yaml"/>
+    <param if="$(arg navigation)" name="max_linear" value="0.20"/>
+  </node>
+  <!-- 启动节点 exam_rviz；其输入输出由对应脚本和下方参数定义。 -->
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="exam_rviz" args="-d $(arg rviz_config)" output="screen">
+    <env name="DISABLE_ROS1_EOL_WARNINGS" value="1"/>
+    <env name="LIBGL_ALWAYS_SOFTWARE" value="1"/>
+  </node>
+</launch>

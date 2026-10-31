@@ -1,0 +1,7 @@
+# 真值地图的元信息；不属于 SLAM 输出，不能作为正式建图导航的输入。
+image: organizer_truth.pgm
+resolution: 0.05
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

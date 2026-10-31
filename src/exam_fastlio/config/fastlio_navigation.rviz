@@ -1,0 +1,202 @@
+# RViz 显示配置：固定坐标系、地图、模型、点云、轨迹、目标工具和保存视角；仅影响显示。
+Panels:
+  - Class: rviz/Displays
+    Name: Displays
+  - Class: rviz/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 1
+      Plane Cell Count: 24
+      Color: 100; 100; 110
+      Alpha: 0.3
+      Reference Frame: map
+      Offset:
+        X: 10
+        Y: 10
+        Z: 0.005
+    - Class: rviz/Map
+      Name: FAST-LIO2 live 2D map
+      Enabled: true
+      Topic: /map
+      Alpha: 0.65
+      Color Scheme: map
+      Draw Behind: true
+    - Class: rviz/MarkerArray
+      Name: Fixed 20m scene (reference display only)
+      Enabled: false
+      Marker Topic: /exam/scene
+      Queue Size: 100
+    - Class: rviz/PointCloud2
+      Name: FAST-LIO2 registered 3D points
+      Enabled: true
+      Topic: /fastlio/cloud_registered
+      Size (m): 0.02
+      Style: Points
+      Color Transformer: AxisColor
+      Axis: Z
+      Decay Time: 0.5
+      Queue Size: 10
+    - Class: rviz/Path
+      Name: FAST-LIO2 estimated path
+      Enabled: true
+      Topic: /fastlio/path
+      Color: 255; 160; 60
+      Line Style: Lines
+      Line Width: 0.025
+      Alpha: 1
+      Buffer Length: 1
+    - Class: rviz/RobotModel
+      Name: TurtleBot3 Waffle Pi
+      Enabled: true
+      Robot Description: robot_description
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1
+    - Class: rviz/LaserScan
+      Name: Live obstacle laser
+      Enabled: true
+      Topic: /scan
+      Size (m): 0.035
+      Style: Points
+      Color Transformer: FlatColor
+      Color: 80; 220; 255
+      Queue Size: 10
+    - Class: rviz/Path
+      Name: Motion trail
+      Enabled: true
+      Topic: /exam/trajectory
+      Color: 255; 70; 70
+      Line Style: Lines
+      Line Width: 0.035
+      Alpha: 1
+      Buffer Length: 1
+    - Class: rviz/Map
+      Name: Global obstacle costmap
+      Enabled: true
+      Topic: /move_base/global_costmap/costmap
+      Alpha: 0.30
+      Color Scheme: costmap
+      Draw Behind: true
+    - Class: rviz/Map
+      Name: Local obstacle costmap
+      Enabled: false
+      Topic: /move_base/local_costmap/costmap
+      Alpha: 0.45
+      Color Scheme: costmap
+      Draw Behind: true
+    - Class: rviz/Path
+      Name: A-star global route
+      Enabled: true
+      Topic: /move_base/GlobalPlanner/plan
+      Color: 60; 255; 100
+      Line Style: Lines
+      Line Width: 0.06
+      Alpha: 1
+      Buffer Length: 1
+    - Class: rviz/Path
+      Name: DWA local route
+      Enabled: true
+      Topic: /move_base/DWAPlannerROS/local_plan
+      Color: 80; 150; 255
+      Line Style: Lines
+      Line Width: 0.05
+      Alpha: 1
+      Buffer Length: 1
+    - Class: rviz/Polygon
+      Name: Collision footprint
+      Enabled: true
+      Topic: /move_base/local_costmap/footprint
+      Color: 255; 255; 100
+      Alpha: 1
+    - Class: rviz/MarkerArray
+      Name: Temporary obstacles (live)
+      Enabled: true
+      Marker Topic: /exam/obstacles
+      Queue Size: 10
+    - Class: rviz/MarkerArray
+      Name: Exploration candidates
+      Enabled: true
+      Marker Topic: /exploration/frontiers
+      Queue Size: 10
+    - Class: rviz/MarkerArray
+      Name: Four room task progress
+      Enabled: true
+      Marker Topic: /exploration/rooms
+      Queue Size: 10
+    - Class: rviz/TF
+      Name: TF
+      Enabled: false
+      Show Names: true
+      Show Axes: true
+      Show Arrows: false
+  Global Options:
+    Background Color: 35; 40; 48
+    Fixed Frame: map
+    Frame Rate: 30
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Name: Current View
+      Distance: 29
+      Focal Point:
+        X: 9.5
+        Y: 9.5
+        Z: 0
+      Pitch: 1.15
+      Yaw: 4.72
+      Near Clip Distance: 0.01
+      Target Frame: map
+    Saved:
+      - Class: rviz/Orbit
+        Name: Navigation close-up
+        Distance: 6
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0
+        Pitch: 1.4
+        Yaw: 4.72
+        Near Clip Distance: 0.01
+        Target Frame: base_footprint
+      - Class: rviz/Orbit
+        Name: Robot close-up
+        Distance: 1.8
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0.08
+        Pitch: 0.65
+        Yaw: 0.9
+        Near Clip Distance: 0.01
+        Target Frame: base_footprint
+      - Class: rviz/Orbit
+        Name: Whole 20m scene
+        Distance: 29
+        Focal Point:
+          X: 9.5
+          Y: 9.5
+          Z: 0
+        Pitch: 1.15
+        Yaw: 4.72
+        Near Clip Distance: 0.01
+        Target Frame: map
+Window Geometry:
+  Width: 1400
+  Height: 900
+  X: 40
+  Y: 40
+  Displays:
+    collapsed: false
+  Views:
+    collapsed: true

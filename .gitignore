@@ -1,0 +1,25 @@
+# catkin build products
+/build/
+/devel/
+/install/
+/logs/
+/.catkin_workspace
+
+# Locally built Livox SDK
+/vendor/livox-sdk-build/
+/vendor/livox-sdk-install/
+
+# Runtime outputs
+*.bag
+*.bag.active
+*.pcd
+*.log
+*.pid
+
+# Python and editor files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store

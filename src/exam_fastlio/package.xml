@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- 声明功能包版本、许可证、构建工具与运行依赖，供 catkin 和 rosdep 识别。 -->
+<package format="2">
+  <name>exam_fastlio</name>
+  <version>0.4.0</version>
+  <description>FAST-LIO2 pose and online grid mapping for the ROS1 navigation exam.</description>
+  <maintainer email="organizer@example.com">Exam organizer</maintainer>
+  <license>BSD-3-Clause</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>exam_bringup</exec_depend>
+  <exec_depend>fast_lio</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>python3-rospkg</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>actionlib</exec_depend>
+  <exec_depend>actionlib_msgs</exec_depend>
+  <exec_depend>move_base_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>map_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>velodyne_gazebo_plugins</exec_depend>
+</package>

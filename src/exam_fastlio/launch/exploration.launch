@@ -1,0 +1,10 @@
+<!-- 只启动前沿探索决策节点；当前位置和地图来自已经运行的导航。 -->
+<launch>
+  <!-- 房间边界是任务语义，避障与可通行性仍由实时建图决定。 -->
+  <arg name="rooms_file" default="$(find exam_fastlio)/config/rooms.yaml"/>
+  <!-- Start the navigation launch first. This launch only enables decisions. -->
+  <!-- 启动节点 frontier_explorer；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_fastlio" type="frontier_explorer.py" name="frontier_explorer" output="screen">
+    <rosparam if="$(eval arg('rooms_file') != '')" command="load" file="$(arg rooms_file)"/>
+  </node>
+</launch>

@@ -1,0 +1,46 @@
+# FAST-LIO2 输入、噪声与外参配置；当前仿真使用 lidar_type 4 的瞬时点云模式。
+# 雷达与 IMU 输入话题和时间同步设置。
+common:
+  lid_topic: /fastlio/points
+  imu_topic: /fastlio/imu
+  time_sync_en: false
+  time_offset_lidar_to_imu: 0.0
+# 点云预处理；当前 lidar_type 4 对应瞬时仿真采样。
+preprocess:
+  # Gazebo ray scans are instantaneous. Use upstream's MARSIM input mode,
+  # not fabricated spinning-LiDAR point times.
+  # 不能给同一时刻生成的仿真射线伪造逐点扫描时间；实机需匹配真实雷达格式。
+  lidar_type: 4
+  scan_line: 16
+  scan_rate: 10
+  timestamp_unit: 0
+  blind: 0.20
+# LIO 测量噪声、搜索范围和雷达到 IMU 的外参。
+mapping:
+  acc_cov: 0.05
+  gyr_cov: 0.01
+  b_acc_cov: 0.0001
+  b_gyr_cov: 0.0001
+  fov_degree: 360.0
+  det_range: 15.0
+  extrinsic_est_en: false
+  # 雷达与 IMU 高度差为 0.472 米，实际机器人必须使用测量标定值。
+  extrinsic_T: [0.0, 0.0, 0.472]
+  extrinsic_R: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+# 控制 FAST-LIO2 发布的路径和点云；二维地图由单独节点生成。
+publish:
+  path_en: true
+  scan_publish_en: true
+  dense_publish_en: true
+  scan_bodyframe_pub_en: false
+# 三维 PCD 保存开关；当前默认关闭，二维 map_saver 是另一套保存接口。
+pcd_save:
+  pcd_save_en: false
+  interval: -1
+feature_extract_enable: false
+point_filter_num: 1
+max_iteration: 4
+filter_size_surf: 0.15
+filter_size_map: 0.15
+cube_side_length: 40.0
+runtime_pos_log_enable: false

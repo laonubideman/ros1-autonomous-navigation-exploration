@@ -1,0 +1,15 @@
+<!-- 旧版参考地图导航启动文件，使用仿真里程计，仅作为学习对照。 -->
+<launch>
+  <arg name="rviz" default="true"/>
+  <include file="$(find exam_bringup)/launch/initial.launch">
+    <arg name="rviz" value="$(arg rviz)"/>
+    <arg name="navigation" value="true"/>
+    <arg name="rviz_config" value="$(find exam_bringup)/config/navigation.rviz"/>
+  </include>
+  <!-- 启动节点 move_base；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam command="load" file="$(find exam_bringup)/config/navigation.yaml"/>
+    <rosparam command="load" file="$(find exam_bringup)/config/costmap_common.yaml" ns="global_costmap"/>
+    <rosparam command="load" file="$(find exam_bringup)/config/costmap_common.yaml" ns="local_costmap"/>
+  </node>
+</launch>

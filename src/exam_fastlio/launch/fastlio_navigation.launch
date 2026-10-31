@@ -1,0 +1,67 @@
+<!-- 连接后台仿真、FAST-LIO2、实时二维地图、A 星、DWA、速度保护与 RViz；探索需另行启动。 -->
+<launch>
+  <arg name="rviz" default="true"/>
+  <!-- 初始化可位于任意安全空地；LIO、点云地图与仿真使用同一初始坐标。 -->
+  <arg name="start_x" default="2"/>
+  <arg name="start_y" default="2"/>
+  <arg name="start_yaw" default="0"/>
+  <param name="use_sim_time" value="true"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find exam_bringup)/worlds/fixed_exam.world"/>
+    <arg name="gui" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+  </include>
+  <param name="robot_description" command="$(find exam_fastlio)/scripts/model_for_fastlio.py"/>
+  <param name="simulation_description" command="$(find exam_fastlio)/scripts/model_for_fastlio.py --sdf"/>
+  <!-- 启动节点 spawn_exam_robot；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_exam_robot" args="-sdf -param simulation_description -model exam_robot -x $(arg start_x) -y $(arg start_y) -Y $(arg start_yaw) -z 0.005" output="screen"/>
+  <!-- 启动节点 robot_state_publisher；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+  <!-- 启动节点 map_to_odom；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom"/>
+  <!-- 启动节点 map_to_fastlio_origin；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_fastlio_origin" args="$(arg start_x) $(arg start_y) 0.078 $(arg start_yaw) 0 0 map camera_init"/>
+  <rosparam command="load" file="$(find exam_fastlio)/config/fastlio.yaml"/>
+  <!-- 启动节点 laserMapping；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen">
+    <remap from="/Odometry" to="/fastlio/odometry"/>
+    <remap from="/cloud_registered" to="/fastlio/cloud_registered"/>
+    <remap from="/path" to="/fastlio/path"/>
+  </node>
+  <!-- 启动节点 fastlio_nav_bridge；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_fastlio" type="fastlio_nav_bridge.py" name="fastlio_nav_bridge" output="screen">
+    <param name="start_x" value="$(arg start_x)"/>
+    <param name="start_y" value="$(arg start_y)"/>
+    <param name="start_yaw" value="$(arg start_yaw)"/>
+  </node>
+  <!-- 启动节点 fastlio_grid；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_fastlio" type="fastlio_grid.py" name="fastlio_grid" output="screen">
+    <param name="start_x" value="$(arg start_x)"/>
+    <param name="start_y" value="$(arg start_y)"/>
+    <param name="start_yaw" value="$(arg start_yaw)"/>
+  </node>
+  <!-- 启动节点 scene_visuals；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_bringup" type="scene_visuals.py" name="scene_visuals" output="screen">
+    <param name="geometry_file" value="$(find exam_bringup)/config/arena.json"/>
+  </node>
+  <!-- 启动节点 velocity_guard；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="exam_bringup" type="velocity_guard.py" name="velocity_guard" output="screen">
+    <rosparam command="load" file="$(find exam_bringup)/config/costmap_common.yaml"/>
+    <param name="require_scan" value="true"/>
+    <param name="max_linear" value="0.20"/>
+  </node>
+  <!-- 启动节点 move_base；其输入输出由对应脚本和下方参数定义。 -->
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam command="load" file="$(find exam_bringup)/config/navigation.yaml"/>
+    <rosparam command="load" file="$(find exam_bringup)/config/costmap_common.yaml" ns="global_costmap"/>
+    <rosparam command="load" file="$(find exam_bringup)/config/costmap_common.yaml" ns="local_costmap"/>
+    <param name="GlobalPlanner/allow_unknown" value="true"/>
+    <param name="global_costmap/static_layer/first_map_only" value="false"/>
+    <param name="local_costmap/static_layer/first_map_only" value="false"/>
+  </node>
+  <!-- 启动节点 exam_rviz；其输入输出由对应脚本和下方参数定义。 -->
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="exam_rviz" args="-d $(find exam_fastlio)/config/fastlio_navigation.rviz" output="screen">
+    <env name="DISABLE_ROS1_EOL_WARNINGS" value="1"/>
+    <env name="LIBGL_ALWAYS_SOFTWARE" value="1"/>
+  </node>
+</launch>

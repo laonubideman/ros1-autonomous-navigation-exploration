@@ -1,0 +1,37 @@
+# 全局和局部代价地图共用的车身轮廓、激光障碍层、射线清除和膨胀配置。
+robot_base_frame: base_footprint
+transform_tolerance: 0.3
+resolution: 0.05
+# Bounds enclose the upstream body, wheels and camera, relative to base_footprint.
+# 轮廓以 base_footprint 为参考，覆盖官方车身、车轮和相机；自制车需重新测量。
+footprint: [[-0.20, -0.16], [0.09, -0.16], [0.09, 0.16], [-0.20, 0.16]]
+footprint_padding: 0.025
+
+# 静态地图层接收 map；FAST-LIO2 launch 设为持续更新，不只使用第一帧。
+static_layer:
+  map_topic: /map
+  first_map_only: true
+  subscribe_to_updates: false
+
+# 二维激光实时标记与射线清除障碍，补充三维投影地图。
+obstacle_layer:
+  observation_sources: laser
+  footprint_clearing_enabled: true
+  laser:
+    topic: /scan
+    sensor_frame: base_scan
+    data_type: LaserScan
+    marking: true
+    clearing: true
+    inf_is_valid: true
+    obstacle_range: 3.4
+    raytrace_range: 3.5
+    min_obstacle_height: 0.0
+    max_obstacle_height: 0.4
+    observation_persistence: 0.0
+    expected_update_rate: 0.5
+
+# 为墙体和障碍周围添加递减代价，使路径保留车身间距。
+inflation_layer:
+  inflation_radius: 0.45
+  cost_scaling_factor: 5.0
