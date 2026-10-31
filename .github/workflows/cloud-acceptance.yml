@@ -1,0 +1,162 @@
+name: ROS1 cloud acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-run-and-record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container:
+      image: osrf/ros:noetic-desktop-full
+      options: --privileged --shm-size=2g
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      DISPLAY: :99
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      ROS_MASTER_URI: http://localhost:11311
+      ROS_HOSTNAME: localhost
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record runner identity
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifacts logs
+          {
+            echo "runner_arch=$(uname -m)"
+            echo "ubuntu=$(lsb_release -ds)"
+            echo "ros_distro=${ROS_DISTRO:-unknown}"
+            echo "commit=${GITHUB_SHA}"
+          } | tee artifacts/environment.txt
+
+      - name: Install build, simulation and recording dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ros-noetic-move-base ros-noetic-dwa-local-planner \
+            ros-noetic-global-planner ros-noetic-map-server \
+            ros-noetic-velodyne-gazebo-plugins \
+            ros-noetic-pcl-ros ros-noetic-eigen-conversions \
+            ros-noetic-teleop-twist-keyboard \
+            build-essential cmake pkg-config \
+            python3-dev python3-rospkg python3-numpy python3-scipy \
+            libpcl-dev libeigen3-dev libboost-all-dev libapr1-dev \
+            xvfb x11-utils ffmpeg
+
+      - name: Build the complete catkin workspace
+        shell: bash
+        run: |
+          set -o pipefail
+          bash build.sh 2>&1 | tee logs/cloud-build.log
+
+      - name: Start virtual display and record RViz
+        shell: bash
+        run: |
+          set -euxo pipefail
+          Xvfb :99 -screen 0 1280x720x24 -nolisten tcp >logs/xvfb.log 2>&1 &
+          echo $! > logs/xvfb.pid
+          sleep 3
+          xdpyinfo -display :99 >/dev/null
+          ffmpeg -y -f x11grab -framerate 15 -video_size 1280x720 \
+            -i :99 -t 150 -c:v libx264 -preset veryfast -pix_fmt yuv420p \
+            artifacts/ros1-cloud-acceptance.mp4 >logs/ffmpeg.log 2>&1 &
+          echo $! > logs/ffmpeg.pid
+
+      - name: Launch Gazebo, FAST-LIO2, map, navigation and RViz
+        shell: bash
+        run: |
+          set -euxo pipefail
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+          roslaunch exam_fastlio fastlio_navigation.launch rviz:=true \
+            >logs/fastlio-navigation.log 2>&1 &
+          echo $! > logs/navigation.pid
+          timeout 180 bash -c '
+            until rosnode list 2>/dev/null | grep -q /laserMapping; do
+              sleep 3
+            done
+          '
+          timeout 180 bash -c '
+            until rostopic list 2>/dev/null | grep -q /fastlio/cloud_registered; do
+              sleep 3
+            done
+          '
+          sleep 20
+
+      - name: Exercise mapping, planning, control and dynamic avoidance
+        shell: bash
+        run: |
+          set -euxo pipefail
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+
+          timeout 12 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
+            '{linear: {x: 0.15}, angular: {z: 0.0}}' || true
+          timeout 8 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
+            '{linear: {x: 0.0}, angular: {z: 0.45}}' || true
+          timeout 10 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
+            '{linear: {x: 0.15}, angular: {z: 0.0}}' || true
+
+          rostopic pub -1 /move_base_simple/goal geometry_msgs/PoseStamped \
+            "{header: {frame_id: 'map'}, pose: {position: {x: 5.5, y: 2.0, z: 0.0}, orientation: {w: 1.0}}}"
+          sleep 12
+
+          rosrun exam_bringup obstacle_demo.py move \
+            --x 4.0 --y 2.0 --axis y --range 1.0 --speed 0.30 --duration 30 \
+            >logs/dynamic-obstacle.log 2>&1 || true
+
+          roslaunch exam_fastlio exploration.launch \
+            >logs/exploration.log 2>&1 &
+          echo $! > logs/exploration.pid
+          sleep 15
+          timeout 15 rostopic echo -n 1 /exploration/status \
+            | tee artifacts/exploration-status.txt
+
+      - name: Run runtime acceptance verifier
+        shell: bash
+        run: |
+          set -o pipefail
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+          {
+            echo "=== ROS nodes ==="
+            rosnode list
+            echo
+            echo "=== ROS topics ==="
+            rostopic list
+            echo
+            echo "=== Runtime verifier ==="
+            python3 verify_runtime.py
+          } 2>&1 | tee artifacts/runtime-acceptance.txt
+
+      - name: Finish recording and collect diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f logs/ffmpeg.pid ]]; then
+            timeout 170 tail --pid="$(cat logs/ffmpeg.pid)" -f /dev/null
+          fi
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash 2>/dev/null
+          rosnode list >artifacts/rosnodes.txt 2>&1
+          rostopic list >artifacts/rostopics.txt 2>&1
+          cp upstream_versions.json artifacts/
+          cp logs/*.log artifacts/ 2>/dev/null
+
+      - name: Upload video, report and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ros1-cloud-acceptance
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
