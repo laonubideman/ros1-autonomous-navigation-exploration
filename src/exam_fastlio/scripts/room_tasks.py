@@ -103,7 +103,9 @@ class RoomTasks:
                             task='room_observe', room=self.active))
                     if len(chosen) == 4:
                         break
-            goals.extend(sorted(observations, key=lambda g: g['score']))
+            # 已经进房但尚未达到覆盖率时，专门面向未知连通块的观察位
+            # 必须先于普通房内前沿。否则普通前沿会持续重生并饿死补盲任务。
+            goals = sorted(observations, key=lambda g: g['score'])+goals
         outside = [g for g in frontiers if g not in inside]
         # 已完成房间的残余前沿不再作为任务目标，避免在房门处反复折返。
         completed = [r['bounds'] for r in self.rooms if r['complete']]
