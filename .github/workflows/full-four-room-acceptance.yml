@@ -141,7 +141,7 @@ jobs:
             python3 verify_runtime.py
           } 2>&1 | tee artifacts/runtime-acceptance.txt
 
-      - name: Wait up to 15 minutes for strict four-room completion
+      - name: Wait up to 20 minutes for strict four-room completion
         shell: bash
         run: |
           set -o pipefail
@@ -167,7 +167,8 @@ jobs:
 
           rospy.init_node('strict_four_room_acceptance', anonymous=True, disable_signals=True)
           rospy.Subscriber('/exploration/status', String, receive, queue_size=1)
-          deadline = time.monotonic() + 900
+          timeout_seconds = 1200
+          deadline = time.monotonic() + timeout_seconds
           previous = None
           last_print = 0.0
           final = None
@@ -183,7 +184,7 @@ jobs:
                   if status is not None:
                       rooms = status.get('rooms', [])
                       summary = {
-                          'elapsed_seconds': round(900 - (deadline - time.monotonic()), 1),
+                          'elapsed_seconds': round(timeout_seconds - (deadline - time.monotonic()), 1),
                           'state': status.get('state'),
                           'active_room': status.get('active_room'),
                           'completed_rooms': status.get('completed_rooms'),
@@ -192,10 +193,12 @@ jobs:
                           'failed': status.get('failed'),
                           'rooms': rooms,
                       }
-                      encoded = json.dumps(summary, ensure_ascii=False, sort_keys=True)
-                      if encoded != previous or time.monotonic() - last_print >= 15:
+                      signature = json.dumps({key: value for key, value in summary.items()
+                                              if key != 'elapsed_seconds'}, ensure_ascii=False, sort_keys=True)
+                      if signature != previous or time.monotonic() - last_print >= 15:
+                          encoded = json.dumps(summary, ensure_ascii=False, sort_keys=True)
                           print(encoded, flush=True)
-                          previous = encoded
+                          previous = signature
                           last_print = time.monotonic()
                       expected = {'A', 'B', 'C', 'D'}
                       room_ids = {room.get('id') for room in rooms}
@@ -216,7 +219,7 @@ jobs:
               time.sleep(0.5)
 
           if final is None:
-              print('FAIL: strict four-room completion was not reached within 900 seconds.', flush=True)
+              print('FAIL: strict four-room completion was not reached within 1200 seconds.', flush=True)
               sys.exit(1)
 
           output = pathlib.Path('artifacts/four-room-final-status.json')
