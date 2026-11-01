@@ -33,7 +33,7 @@ Visualization Manager:
       Queue Size: 100
     - Class: rviz/PointCloud2
       Name: FAST-LIO2 registered 3D points
-      Enabled: true
+      Enabled: false
       Topic: /fastlio/cloud_registered
       Size (m): 0.02
       Style: Points
@@ -79,14 +79,14 @@ Visualization Manager:
       Name: Global obstacle costmap
       Enabled: true
       Topic: /move_base/global_costmap/costmap
-      Alpha: 0.30
+      Alpha: 0.42
       Color Scheme: costmap
       Draw Behind: true
     - Class: rviz/Map
       Name: Local obstacle costmap
-      Enabled: false
+      Enabled: true
       Topic: /move_base/local_costmap/costmap
-      Alpha: 0.45
+      Alpha: 0.55
       Color Scheme: costmap
       Draw Behind: true
     - Class: rviz/Path
@@ -95,7 +95,7 @@ Visualization Manager:
       Topic: /move_base/GlobalPlanner/plan
       Color: 60; 255; 100
       Line Style: Lines
-      Line Width: 0.06
+      Line Width: 0.12
       Alpha: 1
       Buffer Length: 1
     - Class: rviz/Path
@@ -104,7 +104,7 @@ Visualization Manager:
       Topic: /move_base/DWAPlannerROS/local_plan
       Color: 80; 150; 255
       Line Style: Lines
-      Line Width: 0.05
+      Line Width: 0.10
       Alpha: 1
       Buffer Length: 1
     - Class: rviz/Polygon
@@ -148,12 +148,12 @@ Visualization Manager:
     Current:
       Class: rviz/Orbit
       Name: Current View
-      Distance: 29
+      Distance: 8
       Focal Point:
-        X: 9.5
-        Y: 9.5
-        Z: 0
-      Pitch: 1.15
+        X: 3.5
+        Y: 2
+        Z: 0.05
+      Pitch: 1.05
       Yaw: 4.72
       Near Clip Distance: 0.01
       Target Frame: map
