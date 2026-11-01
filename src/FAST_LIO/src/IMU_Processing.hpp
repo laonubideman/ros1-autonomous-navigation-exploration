@@ -27,7 +27,11 @@
 
 /// *************Preconfiguration
 
-#define MAX_INI_COUNT (10)
+// The simulated IMU publishes at 200 Hz. Ten samples cover only about 50 ms
+// and can accidentally capture the spawn/fall transient, which gives the
+// filter a bad gravity estimate. Average roughly five stationary seconds
+// before enabling LIO updates so repeated headless starts are deterministic.
+#define MAX_INI_COUNT (1000)
 
 const bool time_list(PointType &x, PointType &y) {return (x.curvature < y.curvature);};
 
