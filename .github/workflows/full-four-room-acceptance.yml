@@ -90,7 +90,39 @@ jobs:
               sleep 3
             done
           '
-          sleep 20
+          # Do not move until LIO remains close to the configured start while
+          # stationary. This catches a bad gravity initialization immediately
+          # instead of letting an invalid pose contaminate a 20-minute run.
+          timeout 180 python3 - <<'PY'
+          import math
+          import time
+
+          import rospy
+          from nav_msgs.msg import Odometry
+
+          latest = None
+
+          def receive(message):
+              global latest
+              latest = (time.monotonic(), message.pose.pose.position.x,
+                        message.pose.pose.position.y)
+
+          rospy.init_node('wait_for_stable_fastlio', anonymous=True, disable_signals=True)
+          rospy.Subscriber('/odom', Odometry, receive, queue_size=1)
+          stable_since = None
+          while not rospy.is_shutdown():
+              now = time.monotonic()
+              valid = (
+                  latest is not None
+                  and now - latest[0] < 0.6
+                  and math.hypot(latest[1] - 2.0, latest[2] - 2.0) <= 0.35
+              )
+              stable_since = stable_since if valid and stable_since is not None else (now if valid else None)
+              if stable_since is not None and now - stable_since >= 8.0:
+                  print('PASS: FAST-LIO pose stayed stable for 8 seconds before motion.')
+                  break
+              time.sleep(0.1)
+          PY
 
       - name: Exercise mapping, planning, control and dynamic avoidance
         shell: bash
