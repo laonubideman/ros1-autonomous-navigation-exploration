@@ -368,8 +368,11 @@ class Explorer:
                 same_task = self.rooms is None or closest.get('room') == self.rooms.active or not any(g.get('room') == self.rooms.active for g in candidates)
                 if same_task and math.hypot(closest['x']-self.frontier_target[0],closest['y']-self.frontier_target[1])<1.0:
                     candidates.remove(closest)
-                    # 没有当前房间的可达观察目标时，持续推进同一个走廊前沿。
-                    offset = 1 if self.rooms is not None and any(g.get('room') == self.rooms.active for g in candidates) else 0
+                    # 进入房间前不得被新前沿抢走优先级；已在房内时才允许
+                    # 信息量更大的观察点排在中继目标之前。
+                    entering = closest.get('task') == 'room_visit'
+                    offset = 1 if not entering and self.rooms is not None and any(
+                        g.get('room') == self.rooms.active for g in candidates) else 0
                     candidates.insert(offset,closest)
             selected = None
             for candidate in candidates:

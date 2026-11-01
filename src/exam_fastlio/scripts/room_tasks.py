@@ -58,13 +58,24 @@ class RoomTasks:
         valid = (xy[:, 0] >= x0+0.6)&(xy[:, 0] <= x1-0.6)&(xy[:, 1] >= y0+0.6)&(xy[:, 1] <= y1-0.6)
         points = xy[valid]
         # 完全建好图仍需实际访问：目标从已知安全空地选取，而非直接发未知的房间中心。
+        # 优先选从当前位姿可尽快进入的多个候选点；深处中心点会让中继规划
+        # 在房门外反复换前沿。候选点全部由实时地图产生，不使用预设门坐标。
         if not room['visited']:
             if len(points):
                 center = np.array([(x0+x1)/2, (y0+y1)/2])
-                point = points[np.argmin(np.sum((points-center)**2, axis=1))]
-                goals.insert(0, dict(x=float(point[0]), y=float(point[1]),
-                    yaw=math.atan2(point[1]-position[1], point[0]-position[0]),
-                    score=0.0, frontier_m=0.0, task='room_visit', room=self.active))
+                order = np.argsort(np.linalg.norm(points-position, axis=1)+
+                                   0.05*np.linalg.norm(points-center, axis=1))
+                visits = []
+                for point in points[order]:
+                    if all(np.linalg.norm(point-np.array([old['x'], old['y']])) >= 0.8
+                           for old in visits):
+                        visits.append(dict(x=float(point[0]), y=float(point[1]),
+                            yaw=math.atan2(point[1]-position[1], point[0]-position[0]),
+                            score=float(np.linalg.norm(point-position)), frontier_m=0.0,
+                            task='room_visit', room=self.active))
+                    if len(visits) == 8:
+                        break
+                goals = visits+goals
         # 箱体后的未知小块可能没有满足旧阈值的前沿；从已知空地选择多个不同观察位置。
         # 位置随实时未知区变化，不使用预设房间巡航点，也不穿过未知空地。
         if room['visited'] and room['coverage'] < self.minimum:
