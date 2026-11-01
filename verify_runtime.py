@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only acceptance check for the running FAST-LIO navigation stack."""
 import json
+import math
 import sys
 
 import rosnode
@@ -8,6 +9,7 @@ import rospy
 import tf2_ros
 from nav_msgs.msg import OccupancyGrid, Odometry
 from sensor_msgs.msg import Imu, LaserScan, PointCloud2
+from std_msgs.msg import String
 
 
 def receive(topic, message_type, timeout=12.0):
@@ -30,9 +32,19 @@ def main():
     receive('/fastlio/points', PointCloud2)
     cloud = receive('/fastlio/cloud_registered', PointCloud2)
     receive('/fastlio/odometry', Odometry)
-    receive('/odom', Odometry)
+    odometry = receive('/odom', Odometry)
+    health = receive('/exam/fastlio_health', String)
     receive('/scan', LaserScan)
     grid = receive('/map', OccupancyGrid)
+
+    position = odometry.pose.pose.position
+    if not all(math.isfinite(value) for value in (position.x, position.y)):
+        raise RuntimeError('navigation odometry position is not finite')
+    if not (-0.5 <= position.x <= 20.5 and -0.5 <= position.y <= 20.5):
+        raise RuntimeError('navigation odometry position is outside the 20 x 20 m arena')
+    if health.data != 'healthy':
+        raise RuntimeError('FAST-LIO bridge health is ' + health.data)
+    print('[PASS] FAST-LIO navigation health  healthy')
 
     if cloud.width*cloud.height <= 0:
         raise RuntimeError('registered point cloud is empty')
@@ -55,7 +67,6 @@ def main():
     print('[PASS] map -> base_footprint TF   age=%.3fs' % age)
 
     if '/frontier_explorer' in nodes:
-        from std_msgs.msg import String
         status = receive('/exploration/status', String, timeout=5)
         json.loads(status.data)
         print('[PASS] exploration status is valid JSON')
