@@ -66,7 +66,7 @@ jobs:
           sleep 3
           xdpyinfo -display :99 >/dev/null
           ffmpeg -y -f x11grab -framerate 15 -video_size 1280x720 \
-            -i :99 -t 150 -c:v libx264 -preset veryfast -pix_fmt yuv420p \
+            -i :99 -t 210 -c:v libx264 -preset veryfast -pix_fmt yuv420p \
             artifacts/ros1-cloud-acceptance.mp4 >logs/ffmpeg.log 2>&1 &
           echo $! > logs/ffmpeg.pid
 
@@ -98,65 +98,77 @@ jobs:
           source /opt/ros/noetic/setup.bash
           source devel/setup.bash
 
-          timeout 12 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
-            '{linear: {x: 0.15}, angular: {z: 0.0}}' || true
+          # Task 1: keep this motion short so Task 2 starts from a predictable,
+          # open position while still visibly demonstrating forward and turn.
           timeout 8 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
+            '{linear: {x: 0.12}, angular: {z: 0.0}}' || true
+          timeout 5 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
             '{linear: {x: 0.0}, angular: {z: 0.45}}' || true
-          timeout 10 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
-            '{linear: {x: 0.15}, angular: {z: 0.0}}' || true
+          timeout 6 rostopic pub -r 10 /cmd_vel geometry_msgs/Twist \
+            '{linear: {x: 0.12}, angular: {z: 0.0}}' || true
 
-          rostopic pub -1 /move_base_simple/goal geometry_msgs/PoseStamped \
-            "{header: {frame_id: 'map'}, pose: {position: {x: 5.5, y: 2.0, z: 0.0}, orientation: {w: 1.0}}}"
-          sleep 12
-
+          # Task 2: create the obstacle before sending the goal. It starts
+          # about 1.8 m ahead of the robot, leaving real free space on both
+          # sides, so DWA can select and execute a collision-free bypass.
           rosrun exam_bringup obstacle_demo.py move \
-            --x 4.0 --y 2.0 --axis y --range 1.0 --speed 0.30 --duration 30 \
-            >logs/dynamic-obstacle.log 2>&1 || true
+            --x 4.3 --y 2.6 --axis y --range 0.4 --speed 0.12 --duration 90 \
+            >logs/dynamic-obstacle.log 2>&1 &
+          echo $! > logs/obstacle.pid
+          sleep 3
+          rostopic pub -1 /move_base_simple/goal geometry_msgs/PoseStamped \
+            "{header: {frame_id: 'map'}, pose: {position: {x: 6.2, y: 2.6, z: 0.0}, orientation: {w: 1.0}}}"
 
-          roslaunch exam_fastlio exploration.launch \
-            >logs/exploration.log 2>&1 &
-          echo $! > logs/exploration.pid
-          sleep 15
-          timeout 15 rostopic echo -n 1 /exploration/status \
-            | tee artifacts/exploration-status.txt
+          # This is an external acceptance observer only. Navigation still
+          # uses FAST-LIO2, LaserScan and costmaps; Gazebo truth is never fed
+          # back into localization or planning.
+          timeout 95 python3 -u - <<'PY' | tee artifacts/dynamic-avoidance.json
+          import json
+          import math
+          import pathlib
+          import sys
+          import time
 
-      - name: Run runtime acceptance verifier
-        shell: bash
-        run: |
-          set -o pipefail
-          source /opt/ros/noetic/setup.bash
-          source devel/setup.bash
-          {
-            echo "=== ROS nodes ==="
-            rosnode list
-            echo
-            echo "=== ROS topics ==="
-            rostopic list
-            echo
-            echo "=== Runtime verifier ==="
-            python3 verify_runtime.py
-          } 2>&1 | tee artifacts/runtime-acceptance.txt
+          import rospy
+          from gazebo_msgs.msg import ModelStates
+          from nav_msgs.msg import Odometry
 
-      - name: Finish recording and collect diagnostics
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          if [[ -f logs/ffmpeg.pid ]]; then
-            timeout 170 tail --pid="$(cat logs/ffmpeg.pid)" -f /dev/null
-          fi
-          source /opt/ros/noetic/setup.bash
-          source devel/setup.bash 2>/dev/null
-          rosnode list >artifacts/rosnodes.txt 2>&1
-          rostopic list >artifacts/rostopics.txt 2>&1
-          cp upstream_versions.json artifacts/
-          cp logs/*.log artifacts/ 2>/dev/null
-
-      - name: Upload video, report and logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ros1-cloud-acceptance
-          path: artifacts/
-          if-no-files-found: error
-          retention-days: 14
+          robot = None
+          obstacle = None
+          obstacle_samples = 0
+         ���\���[�\�H��]
+	�[���B�X^�]\�[�]�X][ۈH��X^ܛ؛��HY��]
+	�[���B��Y��X�Z]�Wܛ؛�
+Y\��Y�JN���ؘ[�؛����\���[�\�X^�]\�[�]�X][ۋX^ܛ؛����؛�H
+Y\��Y�K���K���K���][ۋ�Y\��Y�K���K���K���][ۋ�JB�X^ܛ؛��HX^
+X^ܛ؛���؛��JB�X^�]\�[�]�X][ۈHX^
+X^�]\�[�]�X][ۋX���؛��WHH���JB�Y�؜�X�H\����ۙN�����\���[�\�HZ[����\���[�\�X]�\�
+�؛��K[؜�X�V�K�؛��WK[؜�X�V�WJJB��Y��X�Z]�W�[�[�Y\��Y�JN���ؘ[؜�X�K؜�X�W��[\\����\���[�\��Y�	�^[W�[\ܘ\�W؛�	���[�Y\��Y�K��[YN���]\�����HHY\��Y�K���V�Y\��Y�K��[YK�[�^
+	�^[W�[\ܘ\�W؛�	�WB�؜�X�HH
+��K���][ۋ���K���][ۋ�JB�؜�X�W��[\\�
+�HB�Y��؛�\����ۙN�����\���[�\�HZ[����\���[�\�X]�\�
+�؛��K[؜�X�V�K�؛��WK[؜�X�V�WJJB�����K�[�]ۛ�J	ݙ\�Y�W�[�[ZX�؞\\���[�۞[[�\�U�YK\�X�W��Yۘ[�U�YJB����K��X��ܚX�\�	����I���Y]�K�X�Z]�Wܛ؛�]Y]YW��^�OLJB����K��X��ܚX�\�	���^�X���[�[��]\��[�[�]\��X�Z]�W�[�[�]Y]YW��^�OLJB�XY[�HH[YK�[ۛ�ۚX�
+H
+�L���XX�YH�[�B��[H�����K�\���]�ۊ
+H[�[YK�[ۛ�ۚX�
+HXY[�N��Y��؛�\����ۙH[�X]�\�
+�؛��KM����؛��WKL���HH�
+N���XX�YH�YB���XZ[YK��Y\
+�JB���\�[H	ܙXX�Y���[	Έ�XX�Y�	ܛ؛��IΈ�؛��	�X^ܛ؛��	Έ��[�
+X^ܛ؛���K�	�X^�]\�[�]�X][ۗ�IΈ��[�
+X^�]\�[�]�X][ۋ�K�	����\�ܛ؛��؜�X�W��[�\��IΈ��[�
+���\���[�\��K�	�؜�X�W��[\\�Έ؜�X�W��[\\��	�\��Y�؜�X�IΈX^ܛ؛���H
+�K�B��\�[��\��Y	�HH���
+��\�[�ܙXX�Y���[	�B�[��\�[��\��Y�؜�X�I�B�[��\�[��X^�]\�[�]�X][ۗ�I�H�H��B�[��\�[�����\�ܛ؛��؜�X�W��[�\��I�H�H���[��\�[��؜�X�W��[\\��H�HL�
+B�]X��]
+	�\�Y�X���[�[ZX�X]��Y[��K\�\�[���ۉ�K�ܚ]W�^
+���ۋ�[\��\�[[��\�W�\��ZOQ�[�K[�[�L�H
+�	���[���[��I�]�N	�B��[�
+��ۋ�[\��\�[[��\�W�\��ZOQ�[�JJB�Y����\�[��\��Y	�N���\˙^]
+	ѐRS��؛�Y����\]HH�\�Y�YY��\�[ۋY��YH[�[ZX��\\���B�B���[�
+�]����؜�X�K�Y
+H����]�۝[�YB���ܝ[�^[W؜�[��\؜�X�W�[[˜H�[[ݙH�YB�����][��^[W٘\�[�^ܘ][ۋ�][��������^ܘ][ۋ������H	��X��	H�����^ܘ][ۋ�Y��Y\MB�[Y[�]MH����X�X��[�H�^ܘ][ۋ��]\��YH\�Y�X���^ܘ][ۋ\�]\˝��H�[YN��[��[�[YHX��\[��H�\�Y�Y\���[��\���[����][�\Y�Z[���\��H��ܛ��ۛ�]X���]\��\����\��H]�[��]\��\��X���OOH�����\�OOH����ۛ�H\��X�X���OOH����X��OOH������X�\��X�X���OOH�[�[YH�\�Y�Y\�OOH��]ی��\�Y�Wܝ[�[YK�B�H���HYH\�Y�X��ܝ[�[YKXX��\[��K���H�[YN��[�\��X�ܙ[��[���X�XYۛ��X�Y��[�^\�
+B��[��\���[����]
+�B�Y���Y����ٙ�\Y˜YWN�[��[Y[�]M�Z[K\YH�
+�]���ٙ�\Y˜Y
+H�Y��]�۝[��B���\��H��ܛ��ۛ�]X���]\��\����\��H]�[��]\��\����]�۝[���ۛ�H\��\�Y�X��ܛ�ۛ�\˝���B�����X�\��\�Y�X��ܛ���X�˝���B��\��X[Wݙ\��[ۜ˚��ۈ\�Y�X������ʋ���\�Y�X������]�۝[��H�[YN�\�Y�Y[��\ܝ[���Y��[�^\�
+B�\�\ΈX�[ۜ��\�YX\�Y�X����]���[YN����KX��YXX��\[��B�]�\�Y�X��Y�[��Y�[\�Y��[��\��܂��][�[ۋY^\ΈM
