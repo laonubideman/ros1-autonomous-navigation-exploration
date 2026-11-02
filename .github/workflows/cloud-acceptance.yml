@@ -135,40 +135,109 @@ jobs:
           robot = None
           obstacle = None
           obstacle_samples = 0
-         ���\���[�\�H��]
-	�[���B�X^�]\�[�]�X][ۈH��X^ܛ؛��HY��]
-	�[���B��Y��X�Z]�Wܛ؛�
-Y\��Y�JN���ؘ[�؛����\���[�\�X^�]\�[�]�X][ۋX^ܛ؛����؛�H
-Y\��Y�K���K���K���][ۋ�Y\��Y�K���K���K���][ۋ�JB�X^ܛ؛��HX^
-X^ܛ؛���؛��JB�X^�]\�[�]�X][ۈHX^
-X^�]\�[�]�X][ۋX���؛��WHH���JB�Y�؜�X�H\����ۙN�����\���[�\�HZ[����\���[�\�X]�\�
-�؛��K[؜�X�V�K�؛��WK[؜�X�V�WJJB��Y��X�Z]�W�[�[�Y\��Y�JN���ؘ[؜�X�K؜�X�W��[\\����\���[�\��Y�	�^[W�[\ܘ\�W؛�	���[�Y\��Y�K��[YN���]\�����HHY\��Y�K���V�Y\��Y�K��[YK�[�^
-	�^[W�[\ܘ\�W؛�	�WB�؜�X�HH
-��K���][ۋ���K���][ۋ�JB�؜�X�W��[\\�
-�HB�Y��؛�\����ۙN�����\���[�\�HZ[����\���[�\�X]�\�
-�؛��K[؜�X�V�K�؛��WK[؜�X�V�WJJB�����K�[�]ۛ�J	ݙ\�Y�W�[�[ZX�؞\\���[�۞[[�\�U�YK\�X�W��Yۘ[�U�YJB����K��X��ܚX�\�	����I���Y]�K�X�Z]�Wܛ؛�]Y]YW��^�OLJB����K��X��ܚX�\�	���^�X���[�[��]\��[�[�]\��X�Z]�W�[�[�]Y]YW��^�OLJB�XY[�HH[YK�[ۛ�ۚX�
-H
-�L���XX�YH�[�B��[H�����K�\���]�ۊ
-H[�[YK�[ۛ�ۚX�
-HXY[�N��Y��؛�\����ۙH[�X]�\�
-�؛��KM����؛��WKL���HH�
-N���XX�YH�YB���XZ[YK��Y\
-�JB���\�[H	ܙXX�Y���[	Έ�XX�Y�	ܛ؛��IΈ�؛��	�X^ܛ؛��	Έ��[�
-X^ܛ؛���K�	�X^�]\�[�]�X][ۗ�IΈ��[�
-X^�]\�[�]�X][ۋ�K�	����\�ܛ؛��؜�X�W��[�\��IΈ��[�
-���\���[�\��K�	�؜�X�W��[\\�Έ؜�X�W��[\\��	�\��Y�؜�X�IΈX^ܛ؛���H
-�K�B��\�[��\��Y	�HH���
-��\�[�ܙXX�Y���[	�B�[��\�[��\��Y�؜�X�I�B�[��\�[��X^�]\�[�]�X][ۗ�I�H�H��B�[��\�[�����\�ܛ؛��؜�X�W��[�\��I�H�H���[��\�[��؜�X�W��[\\��H�HL�
-B�]X��]
-	�\�Y�X���[�[ZX�X]��Y[��K\�\�[���ۉ�K�ܚ]W�^
-���ۋ�[\��\�[[��\�W�\��ZOQ�[�K[�[�L�H
-�	���[���[��I�]�N	�B��[�
-��ۋ�[\��\�[[��\�W�\��ZOQ�[�JJB�Y����\�[��\��Y	�N���\˙^]
-	ѐRS��؛�Y����\]HH�\�Y�YY��\�[ۋY��YH[�[ZX��\\���B�B���[�
-�]����؜�X�K�Y
-H����]�۝[�YB���ܝ[�^[W؜�[��\؜�X�W�[[˜H�[[ݙH�YB�����][��^[W٘\�[�^ܘ][ۋ�][��������^ܘ][ۋ������H	��X��	H�����^ܘ][ۋ�Y��Y\MB�[Y[�]MH����X�X��[�H�^ܘ][ۋ��]\��YH\�Y�X���^ܘ][ۋ\�]\˝��H�[YN��[��[�[YHX��\[��H�\�Y�Y\���[��\���[����][�\Y�Z[���\��H��ܛ��ۛ�]X���]\��\����\��H]�[��]\��\��X���OOH�����\�OOH����ۛ�H\��X�X���OOH����X��OOH������X�\��X�X���OOH�[�[YH�\�Y�Y\�OOH��]ی��\�Y�Wܝ[�[YK�B�H���HYH\�Y�X��ܝ[�[YKXX��\[��K���H�[YN��[�\��X�ܙ[��[���X�XYۛ��X�Y��[�^\�
-B��[��\���[����]
-�B�Y���Y����ٙ�\Y˜YWN�[��[Y[�]M�Z[K\YH�
-�]���ٙ�\Y˜Y
-H�Y��]�۝[��B���\��H��ܛ��ۛ�]X���]\��\����\��H]�[��]\��\����]�۝[���ۛ�H\��\�Y�X��ܛ�ۛ�\˝���B�����X�\��\�Y�X��ܛ���X�˝���B��\��X[Wݙ\��[ۜ˚��ۈ\�Y�X������ʋ���\�Y�X������]�۝[��H�[YN�\�Y�Y[��\ܝ[���Y��[�^\�
-B�\�\ΈX�[ۜ��\�YX\�Y�X����]���[YN����KX��YXX��\[��B�]�\�Y�X��Y�[��Y�[\�Y��[��\��܂��][�[ۋY^\ΈM
+          closest_center = float('inf')
+          max_lateral_deviation = 0.0
+          max_robot_x = -float('inf')
+
+          def receive_robot(message):
+              global robot, closest_center, max_lateral_deviation, max_robot_x
+              robot = (message.pose.pose.position.x, message.pose.pose.position.y)
+              max_robot_x = max(max_robot_x, robot[0])
+              max_lateral_deviation = max(max_lateral_deviation, abs(robot[1] - 2.6))
+              if obstacle is not None:
+                  closest_center = min(closest_center, math.hypot(robot[0]-obstacle[0], robot[1]-obstacle[1]))
+
+          def receive_models(message):
+              global obstacle, obstacle_samples, closest_center
+              if 'exam_temporary_box' not in message.name:
+                  return
+              pose = message.pose[message.name.index('exam_temporary_box')]
+              obstacle = (pose.position.x, pose.position.y)
+              obstacle_samples += 1
+              if robot is not None:
+                  closest_center = min(closest_center, math.hypot(robot[0]-obstacle[0], robot[1]-obstacle[1]))
+
+          rospy.init_node('verify_dynamic_bypass', anonymous=True, disable_signals=True)
+          rospy.Subscriber('/odom', Odometry, receive_robot, queue_size=1)
+          rospy.Subscriber('/gazebo/model_states', ModelStates, receive_models, queue_size=1)
+          deadline = time.monotonic() + 90.0
+          reached = False
+          while not rospy.is_shutdown() and time.monotonic() < deadline:
+              if robot is not None and math.hypot(robot[0]-6.2, robot[1]-2.6) <= 0.45:
+                  reached = True
+                  break
+              time.sleep(0.1)
+
+          result = {
+              'reached_goal': reached,
+              'robot_xy': robot,
+              'max_robot_x': round(max_robot_x, 3),
+              'max_lateral_deviation_m': round(max_lateral_deviation, 3),
+              'closest_robot_obstacle_center_m': round(closest_center, 3),
+              'obstacle_samples': obstacle_samples,
+              'passed_obstacle': max_robot_x >= 4.9,
+          }
+          result['passed'] = bool(
+              result['reached_goal']
+              and result['passed_obstacle']
+              and result['max_lateral_deviation_m'] >= 0.35
+              and result['closest_robot_obstacle_center_m'] >= 0.60
+              and result['obstacle_samples'] >= 10
+          )
+          pathlib.Path('artifacts/dynamic-avoidance-result.json').write_text(
+              json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(result, ensure_ascii=False))
+          if not result['passed']:
+              sys.exit('FAIL: robot did not complete a verified collision-free dynamic bypass')
+          PY
+
+          kill "$(cat logs/obstacle.pid)" 2>/dev/null || true
+          rosrun exam_bringup obstacle_demo.py remove || true
+
+          roslaunch exam_fastlio exploration.launch \
+            >logs/exploration.log 2>&1 &
+          echo $! > logs/exploration.pid
+          sleep 15
+          timeout 15 rostopic echo -n 1 /exploration/status \
+            | tee artifacts/exploration-status.txt
+
+      - name: Run runtime acceptance verifier
+        shell: bash
+        run: |
+          set -o pipefail
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+          {
+            echo "=== ROS nodes ==="
+            rosnode list
+            echo
+            echo "=== ROS topics ==="
+            rostopic list
+            echo
+            echo "=== Runtime verifier ==="
+            python3 verify_runtime.py
+          } 2>&1 | tee artifacts/runtime-acceptance.txt
+
+      - name: Finish recording and collect diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f logs/ffmpeg.pid ]]; then
+            timeout 170 tail --pid="$(cat logs/ffmpeg.pid)" -f /dev/null
+          fi
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash 2>/dev/null
+          rosnode list >artifacts/rosnodes.txt 2>&1
+          rostopic list >artifacts/rostopics.txt 2>&1
+          cp upstream_versions.json artifacts/
+          cp logs/*.log artifacts/ 2>/dev/null
+
+      - name: Upload video, report and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ros1-cloud-acceptance
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
